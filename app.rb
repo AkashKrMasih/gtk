@@ -18,8 +18,9 @@ module Pickers
   end
 
   # Calls the block with an Array of paths (or never, if cancelled).
-  def choose_sources(parent, title: 'Select files or folders', &on_done)
-    chooser = Gtk::FileChooserNative.new(title, parent, :open, 'Add', 'Cancel')
+  def choose_sources(parent, title: 'Select files or folders', folders: false, &on_done)
+    action  = folders ? :select_folder : :open
+    chooser = Gtk::FileChooserNative.new(title, parent, action, 'Add', 'Cancel')
     chooser.select_multiple = true
     run(chooser) do
       list = chooser.files
@@ -180,9 +181,14 @@ class MainWindow < Gtk::ApplicationWindow
     row = Gtk::Box.new(:horizontal, 8)
 
     @copy_btn = Gtk::Button.new
-    @copy_btn.label = 'Copy…'
+    @copy_btn.label = 'Copy files…'
     @copy_btn.hexpand = true
     @copy_btn.signal_connect('clicked') { on_copy }
+
+    @copy_folder_btn = Gtk::Button.new
+    @copy_folder_btn.label = 'Copy folders…'
+    @copy_folder_btn.hexpand = true
+    @copy_folder_btn.signal_connect('clicked') { on_copy(folders: true) }
 
     @paste_btn = Gtk::Button.new
     @paste_btn.label = 'Paste to…'
@@ -194,6 +200,7 @@ class MainWindow < Gtk::ApplicationWindow
     @clear_btn.signal_connect('clicked') { on_clear }
 
     row.append(@copy_btn)
+    row.append(@copy_folder_btn)
     row.append(@paste_btn)
     row.append(@clear_btn)
     row
@@ -205,8 +212,9 @@ class MainWindow < Gtk::ApplicationWindow
     lbl
   end
 
-  def on_copy
-    Pickers.choose_sources(self, title: 'Select files or folders to copy') do |paths|
+  def on_copy(folders: false)
+    title = folders ? 'Select folders to copy' : 'Select files to copy'
+    Pickers.choose_sources(self, title: title, folders: folders) do |paths|
       paths.each { |path| @clipboard_paths << path unless @clipboard_paths.include?(path) }
       refresh_path_view
       update_controls
@@ -306,8 +314,9 @@ class MainWindow < Gtk::ApplicationWindow
 
   def update_controls
     sensitive = !@busy
-    @copy_btn.sensitive     = sensitive
-    @clear_btn.sensitive    = sensitive
+    @copy_btn.sensitive        = sensitive
+    @copy_folder_btn.sensitive = sensitive
+    @clear_btn.sensitive       = sensitive
     @paste_btn.sensitive    = sensitive && @enabled && !@clipboard_paths.empty?
     @power_switch.sensitive = sensitive
   end
