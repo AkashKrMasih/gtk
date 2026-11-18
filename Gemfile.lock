@@ -49,4 +49,4 @@ DEPENDENCIES
   gtk3 (~> 4.2)
 
 BUNDLED WITH
-   2.4.1
+  4.1.0
