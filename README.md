@@ -11,7 +11,8 @@ Small Ruby + GTK 3 desktop app: stage files and folders, then paste them into a 
 On Debian/Ubuntu — for the **gtk3** gem (default in `Gemfile`):
 
 ```bash
-sudo apt install rsync libgtk-3-dev libglib2.0-dev
+sudo apt install libgtk-4-dev libgirepository1.0-dev rsync
+
 ```
 
 If `bundle install` fails to compile native extensions, switch to **GirFFI** bindings (runtime libraries only). In `Gemfile`, comment `gtk3` and uncomment `gir_ffi-gtk`, then:
