@@ -5,7 +5,8 @@ require_relative 'rsync_copier'
 
 class MainWindow < Gtk::ApplicationWindow
   def initialize(app)
-    super(application: app, title: 'Rsync Paste')
+    super(application: app)
+    self.title = 'Rsync Paste'
     set_default_size(520, 420)
     set_border_width(12)
 
