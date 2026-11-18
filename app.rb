@@ -25,7 +25,7 @@ module GtkLoader
 
   # Returns array of paths or nil if cancelled.
   def choose_sources(parent, title: 'Select files or folders')
-    dialog = build_open_dialog(parent, title)
+    dialog   = build_open_dialog(parent, title)
     response = dialog.run
     return nil unless accept?(response)
 
@@ -38,7 +38,7 @@ module GtkLoader
 
   # Returns destination path or nil if cancelled.
   def choose_folder(parent, title: 'Choose destination folder')
-    dialog = build_folder_dialog(parent, title)
+    dialog   = build_folder_dialog(parent, title)
     response = dialog.run
     return nil unless accept?(response)
 
@@ -49,11 +49,11 @@ module GtkLoader
 
   def build_open_dialog(parent, title)
     if gtk3?
-      dialog = Gtk::FileChooserDialog.new(title: title, parent: parent, action: :open)
+      dialog                 = Gtk::FileChooserDialog.new(title: title, parent: parent, action: :open)
       dialog.select_multiple = true
       dialog.add_buttons(['Cancel', :cancel], ['Add', :accept])
     else
-      dialog = Gtk::FileChooserDialog.new(title, parent, :open, [['Cancel', :cancel], ['Add', :accept]])
+      dialog                 = Gtk::FileChooserDialog.new(title, parent, :open, [['Cancel', :cancel], ['Add', :accept]])
       dialog.select_multiple = true
     end
     dialog
@@ -127,9 +127,9 @@ class MainWindow < Gtk::ApplicationWindow
     set_default_size(520, 420)
     set_border_width(12)
 
-    @enabled = true
+    @enabled         = true
     @clipboard_paths = []
-    @busy = false
+    @busy            = false
 
     build_ui
     signal_connect('destroy') { app.quit }
@@ -149,8 +149,8 @@ class MainWindow < Gtk::ApplicationWindow
     scroll = Gtk::ScrolledWindow.new
     scroll.set_policy(:automatic, :automatic)
     scroll.set_min_content_height(120)
-    @path_view = Gtk::TextView.new
-    @path_view.editable = false
+    @path_view           = Gtk::TextView.new
+    @path_view.editable  = false
     @path_view.monospace = true
     scroll.add(@path_view)
     root.pack_start(scroll, expand: true, fill: true, padding: 0)
@@ -162,9 +162,9 @@ class MainWindow < Gtk::ApplicationWindow
     scroll_log = Gtk::ScrolledWindow.new
     scroll_log.set_policy(:automatic, :automatic)
     scroll_log.set_min_content_height(80)
-    @log_buffer = Gtk::TextBuffer.new
-    log_view = Gtk::TextView.new(@log_buffer)
-    log_view.editable = false
+    @log_buffer        = Gtk::TextBuffer.new
+    log_view           = Gtk::TextView.new(@log_buffer)
+    log_view.editable  = false
     log_view.monospace = true
     scroll_log.add(log_view)
     root.pack_start(scroll_log, expand: true, fill: true, padding: 0)
@@ -174,14 +174,15 @@ class MainWindow < Gtk::ApplicationWindow
   end
 
   def power_row
-    row = Gtk::Box.new(:horizontal, 8)
-    @power_switch = Gtk::Switch.new(active: true)
+    row                  = Gtk::Box.new(:horizontal, 8)
+    @power_switch        = Gtk::Switch.new
+    @power_switch.active = true
     @power_switch.signal_connect('notify::active') do |sw, _|
       @enabled = sw.active?
       append_log(@enabled ? 'App is ON — copy and paste enabled.' : 'App is OFF — paste disabled.')
       update_controls
     end
-    label = Gtk::Label.new('App is ON')
+    label        = Gtk::Label.new('App is ON')
     label.xalign = 0
     @power_switch.signal_connect('notify::active') { |sw, _| label.label = sw.active? ? 'App is ON' : 'App is OFF' }
     row.pack_start(label, expand: true, fill: true, padding: 0)
@@ -190,7 +191,7 @@ class MainWindow < Gtk::ApplicationWindow
   end
 
   def actions_row
-    row = Gtk::Box.new(:horizontal, 8)
+    row       = Gtk::Box.new(:horizontal, 8)
     @copy_btn = Gtk::Button.new(label: 'Copy…')
     @copy_btn.signal_connect('clicked') { on_copy }
     @paste_btn = Gtk::Button.new(label: 'Paste to…')
@@ -204,7 +205,7 @@ class MainWindow < Gtk::ApplicationWindow
   end
 
   def staging_label
-    lbl = Gtk::Label.new('Staged paths (copied with rsync on paste):')
+    lbl        = Gtk::Label.new('Staged paths (copied with rsync on paste):')
     lbl.xalign = 0
     lbl
   end
@@ -238,7 +239,7 @@ class MainWindow < Gtk::ApplicationWindow
     @busy = true
     update_controls
     @progress_bar.fraction = 0
-    @progress_label.label = 'Running rsync…'
+    @progress_label.label  = 'Running rsync…'
     append_log("Pasting into #{destination}")
 
     sources = @clipboard_paths.dup
@@ -269,7 +270,7 @@ class MainWindow < Gtk::ApplicationWindow
     # rsync --info=progress2: e.g. "  1,234,567  45%   12.34MB/s    0:00:01"
     if line =~ /(\d+)\s*%/
       @progress_bar.fraction = Regexp.last_match(1).to_f / 100.0
-      @progress_label.label = line
+      @progress_label.label  = line
     end
   end
 
@@ -278,11 +279,11 @@ class MainWindow < Gtk::ApplicationWindow
     update_controls
     if success
       @progress_bar.fraction = 1.0
-      @progress_label.label = "Done — pasted to #{destination}"
+      @progress_label.label  = "Done — pasted to #{destination}"
       append_log('Paste completed.')
     else
       @progress_bar.fraction = 0
-      @progress_label.label = 'Paste failed'
+      @progress_label.label  = 'Paste failed'
       append_log("Error: #{message}")
       show_error(message)
     end
@@ -290,9 +291,9 @@ class MainWindow < Gtk::ApplicationWindow
 
   def show_error(message)
     dialog = Gtk::MessageDialog.new(
-      parent: self,
-      flags: :destroy_with_parent,
-      type: :error,
+      parent:  self,
+      flags:   :destroy_with_parent,
+      type:    :error,
       buttons: :close,
       message: message
     )
@@ -301,7 +302,7 @@ class MainWindow < Gtk::ApplicationWindow
   end
 
   def refresh_path_view
-    text = @clipboard_paths.empty? ? '(nothing staged)' : @clipboard_paths.join("\n")
+    text                   = @clipboard_paths.empty? ? '(nothing staged)' : @clipboard_paths.join("\n")
     @path_view.buffer.text = text
   end
 
@@ -311,10 +312,10 @@ class MainWindow < Gtk::ApplicationWindow
   end
 
   def update_controls
-    sensitive = !@busy
-    @copy_btn.sensitive = sensitive
-    @clear_btn.sensitive = sensitive
-    @paste_btn.sensitive = sensitive && @enabled && !@clipboard_paths.empty?
+    sensitive               = !@busy
+    @copy_btn.sensitive     = sensitive
+    @clear_btn.sensitive    = sensitive
+    @paste_btn.sensitive    = sensitive && @enabled && !@clipboard_paths.empty?
     @power_switch.sensitive = !@busy
   end
 end
