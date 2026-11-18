@@ -8,16 +8,23 @@ Small Ruby + GTK 3 desktop app: stage files and folders, then paste them into a 
 - `rsync` on your PATH (default `/usr/bin/rsync`)
 - GTK 3 development libraries (for the `gtk3` gem)
 
-On Debian/Ubuntu:
+On Debian/Ubuntu — for the **gtk3** gem (default in `Gemfile`):
 
 ```bash
-sudo apt install rsync libgtk-3-dev
+sudo apt install rsync libgtk-3-dev libglib2.0-dev
+```
+
+If `bundle install` fails to compile native extensions, switch to **GirFFI** bindings (runtime libraries only). In `Gemfile`, comment `gtk3` and uncomment `gir_ffi-gtk`, then:
+
+```bash
+sudo apt install rsync gir1.2-gtk-3.0 libharfbuzz-gobject0 gobject-introspection
+gem install gir_ffi-gtk   # or bundle install
 ```
 
 ## Setup
 
 ```bash
-cd rsync-paste-gtk
+cd ~/rsync-paste-gtk
 bundle install
 ```
 

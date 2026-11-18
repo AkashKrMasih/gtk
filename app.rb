@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'gtk3'
+require_relative 'lib/gtk_loader'
 require_relative 'lib/main_window'
 
 unless RsyncCopier.valid_rsync?

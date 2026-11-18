@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'open3'
-require 'fileutils'
 
 class RsyncCopier
   RSYNC_BIN = ENV.fetch('RSYNC', '/usr/bin/rsync')

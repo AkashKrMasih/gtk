@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'gtk3'
+require_relative 'gtk_loader'
 require_relative 'rsync_copier'
 
 class MainWindow < Gtk::ApplicationWindow
@@ -92,48 +92,20 @@ class MainWindow < Gtk::ApplicationWindow
   end
 
   def on_copy
-    dialog = Gtk::FileChooserDialog.new(
-      title: 'Select files or folders to copy',
-      parent: self,
-      action: :open
-    )
-    dialog.select_multiple = true
-    dialog.add_buttons(
-      ['Cancel', :cancel],
-      ['Add', :accept]
-    )
+    paths = GtkLoader.choose_sources(self, title: 'Select files or folders to copy')
+    return unless paths
 
-    response = dialog.run
-    if response == :accept
-      dialog.filenames.each do |path|
-        @clipboard_paths << path unless @clipboard_paths.include?(path)
-      end
-      refresh_path_view
-      append_log("Staged #{dialog.filenames.size} item(s).")
-    end
-    dialog.destroy
+    paths.each { |path| @clipboard_paths << path unless @clipboard_paths.include?(path) }
+    refresh_path_view
+    append_log("Staged #{paths.size} item(s).")
   end
 
   def on_paste
     return unless @enabled
     return if @clipboard_paths.empty?
 
-    dialog = Gtk::FileChooserDialog.new(
-      title: 'Choose destination folder',
-      parent: self,
-      action: :select_folder
-    )
-    dialog.add_buttons(
-      ['Cancel', :cancel],
-      ['Paste here', :accept]
-    )
-
-    response = dialog.run
-    if response == :accept
-      dest = dialog.filename
-      start_paste(dest)
-    end
-    dialog.destroy
+    dest = GtkLoader.choose_folder(self, title: 'Choose destination folder')
+    start_paste(dest) if dest
   end
 
   def on_clear
