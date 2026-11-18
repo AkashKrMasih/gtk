@@ -328,7 +328,7 @@ end
 app = Gtk::Application.new('com.example.RsyncPaste', :flags_none)
 app.signal_connect('activate') do |application|
   window = MainWindow.new(application)
-  window.show
+  window.show_all
 end
 
 status = app.run([$PROGRAM_NAME] + ARGV)
