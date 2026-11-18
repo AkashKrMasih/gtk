@@ -15,5 +15,5 @@ app.signal_connect('activate') do |application|
   window.show
 end
 
-status = app.run
+status = app.run([$PROGRAM_NAME] + ARGV)
 exit(status)
