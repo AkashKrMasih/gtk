@@ -146,6 +146,7 @@ class MainWindow < Gtk::ApplicationWindow
     @log_view.editable  = false
     @log_view.monospace = true
     @log_buffer = @log_view.buffer
+    @end_mark   = @log_buffer.create_mark(nil, @log_buffer.end_iter, false)
     scroll_log.child = @log_view
     root.append(scroll_log)
 
@@ -299,9 +300,8 @@ class MainWindow < Gtk::ApplicationWindow
 
   def append_log(line)
     @log_buffer.insert(@log_buffer.end_iter, "#{line}\n")
-    # keep the newest line visible
-    @log_buffer.place_cursor(@log_buffer.end_iter)
-    @log_view.scroll_to_mark(@log_buffer.get_insert, 0.0, false, 0.0, 0.0)
+    # keep the newest line visible (the mark has right gravity, so it stays at the end)
+    @log_view.scroll_to_mark(@end_mark, 0.0, false, 0.0, 0.0)
   end
 
   def update_controls
